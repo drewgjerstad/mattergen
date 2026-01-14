@@ -14,9 +14,43 @@ conda create --name mattergen-env python=3.10
 # Activate environment
 conda activate mattergen-env
 
-# Install PyTorch with CUDA 11.8
+# Set CUDA Architecture for A100 or A40
 export TORCH_CUDA_ARCH_LIST="8.0;8.6"
-conda install pytorch==2.2.1 torchvision==0.17.1 torchaudio==2.2.1 pytorch-cuda=11.8 -c pytorch -c nvidia
+
+# Add CUDA Path to environment
+export CUDA_HOME=/common/software/install/spack/linux-centos7-ivybridge/gcc-7.2.0/cuda-11.8.0-xqzqlf2v77opht3bv4onsqt7uuiomqec
+export PATH=$CUDA_HOME/bin:$PATH
+export LD_LIBRARY_PATH=$CUDA_HOME/lib64:$LD_LIBRARY_PATH
+
+# Force build system to use loaded GCC
+export CC=$(which gcc)
+export CXX=$(which g++)
+export CUDAHOSTCXX=$(which g++)
+
+# Disable build isolation
+export PIP_NO_BUILD_ISOLATION=1
+
+# Ensure Intel MKL Compatibility
+export MKL_THREADING_LAYER=GNU
+echo "export MKL_THREADING_LAYER=GNU" >> ~/.bashrc
+
+# Install PyTorch with CUDA 11.8
+pip install torch==2.2.1 torchvision==0.17.1 torchaudio==2.2.1 -i https://download.pytorch.org/whl/cu118
+
+# Ensure Compatible NumPy before PyG Installation
+pip install 'numpy<2.0'
+
+# Install PyG build dependencies
+pip install setuptools wheel ninja meson-python pybind11 cython pythran
+conda install -c conda-forge openblas
+
+# Install PyG
+pip install --no-build-isolation --verbose git+https://github.com/pyg-team/pyg-lib.git
+pip install --no-build-isolation --no-binary :all: --no-cache-dir torch-scatter
+pip install --no-build-isolation --no-binary :all: --no-cache-dir torch-sparse
+pip install --no-build-isolation --no-binary :all: --no-cache-dir torch-cluster
+pip install --no-build-isolation --no-binary :all: --no-cache-dir torch-spline-conv
+pip install torch-geometric
 
 # Install MatterGen without dependencies
 pip install --no-deps -e .

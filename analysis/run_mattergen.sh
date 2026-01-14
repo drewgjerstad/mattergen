@@ -17,7 +17,7 @@
 
 GENERATION_MODE="unconditional"             # generation mode
 MODEL_NAME=mattergen_base                   # model name (check docs)
-RESULTS_PATH=results/                       # path to results (check docs)
+RESULTS_PATH=analysis/results/              # path to results (check docs)
 BATCH_SIZE=16                               # batch size
 N_BATCHES=1                                 # number of batches
 N_SAMPLES=$(($BATCH_SIZE * $N_BATCHES))     # total number of samples
