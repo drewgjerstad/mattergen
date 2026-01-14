@@ -1,7 +1,7 @@
 #!/bin/bash -l
 
 # SETUP RESOURCE
-#SBATCH --time=12:00:00
+#SBATCH --time=6:00:00
 #SBATCH --ntasks=16
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=gjers043@umn.edu
@@ -15,14 +15,14 @@
 # > multiple properties, simply adjust the PROPERTIES variable according to the
 # > repo's README file.
 
-GENERATION_MODE="unconditional"             # generation mode
-MODEL_NAME=mattergen_base                   # model name (check docs)
-RESULTS_PATH=analysis/results/              # path to results (check docs)
+GENERATION_MODE="property-conditioned"      # generation mode
+MODEL_NAME=ml_bulk_modulus                  # model name (check docs)
+RESULTS_PATH="analysis/results/bulk_modulus_01_13/003_liquid/"   # path to results (check docs)
 BATCH_SIZE=16                               # batch size
-N_BATCHES=1                                 # number of batches
+N_BATCHES=16                                # number of batches
 N_SAMPLES=$(($BATCH_SIZE * $N_BATCHES))     # total number of samples
 
-PROPERTIES="{'dft_mag_density': 0.15}"      # property conditions
+PROPERTIES="{'ml_bulk_modulus':3}"       # property conditions
 GAMMA=2.0                                   # gamma parameter in classifier-free diffusion guidance
 
 
@@ -54,16 +54,19 @@ cd /users/6/gjers043/mattergen/
 
 if [[ "$GENERATION_MODE" == "unconditional" ]]; then
     # UNCONDITIONAL GENERATION
-    mattergen-generate $RESULTS_PATH \
-        --pretrained-name=$MODEL_NAME \
+    mattergen-generate \
+        --output_path=$RESULTS_PATH \
+        --pretrained_name=$MODEL_NAME \
         --batch_size=$BATCH_SIZE \
-        --num_batches $N_BATCHES
+        --num_batches=$N_BATCHES
 
 elif [[ "$GENERATION_MODE" == "property-conditioned" ]]; then
     # PROPERTY-CONDITIONED GENERATION
-    mattergen-generate $RESULTS_PATH \
-        --pretrained-name=$MODEL_NAME \
+    mattergen-generate \
+        --output_path=$RESULTS_PATH \
+        --pretrained_name=$MODEL_NAME \
         --batch_size=$BATCH_SIZE \
+        --num_batches=$N_BATCHES \
         --properties_to_condition_on=$PROPERTIES \
         --diffusion_guidance_factor=$GAMMA
 
