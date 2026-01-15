@@ -1,7 +1,7 @@
 #!/bin/bash -l
 
 # SETUP RESOURCE
-#SBATCH --time=6:00:00
+#SBATCH --time=2:00:00
 #SBATCH --ntasks=16
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=gjers043@umn.edu
@@ -15,14 +15,14 @@
 # > multiple properties, simply adjust the PROPERTIES variable according to the
 # > repo's README file.
 
-GENERATION_MODE="property-conditioned"      # generation mode
+GENERATION_MODE="unconditional"             # generation mode
 MODEL_NAME=ml_bulk_modulus                  # model name (check docs)
-RESULTS_PATH="analysis/results/bulk_modulus_01_13/003_liquid/"   # path to results (check docs)
+RESULTS_PATH="analysis/results/bulk_modulus_01_13/440_diamond/" # path to results (check docs)
 BATCH_SIZE=16                               # batch size
 N_BATCHES=16                                # number of batches
 N_SAMPLES=$(($BATCH_SIZE * $N_BATCHES))     # total number of samples
 
-PROPERTIES="{'ml_bulk_modulus':3}"       # property conditions
+PROPERTIES="{'ml_bulk_modulus':440}"        # property conditions
 GAMMA=2.0                                   # gamma parameter in classifier-free diffusion guidance
 
 
@@ -49,36 +49,11 @@ conda activate mattergen-env
 # Load Modules
 module load cuda/11.8.0-gcc-7.2.0-xqzqlf2
 
-# Run MatterGen Generation
+# Run MatterGen Evaluation
 cd /users/6/gjers043/mattergen/
 
-if [[ "$GENERATION_MODE" == "unconditional" ]]; then
-    # UNCONDITIONAL GENERATION
-    mattergen-generate \
-        --output_path=$RESULTS_PATH \
-        --pretrained_name=$MODEL_NAME \
-        --batch_size=$BATCH_SIZE \
-        --num_batches=$N_BATCHES
-
-elif [[ "$GENERATION_MODE" == "property-conditioned" ]]; then
-    # PROPERTY-CONDITIONED GENERATION
-    mattergen-generate \
-        --output_path=$RESULTS_PATH \
-        --pretrained_name=$MODEL_NAME \
-        --batch_size=$BATCH_SIZE \
-        --num_batches=$N_BATCHES \
-        --properties_to_condition_on=$PROPERTIES \
-        --diffusion_guidance_factor=$GAMMA
-
-else
-    # Incorrect value passed for mode of generation.
-    echo ERROR: Invalid generation mode specified. See SBATCH script for info.
-fi
-
-
-# Run MatterGen Evaluation
-
 # (1) Load Reference Dataset
+git config --local credential.helper store
 git lfs pull -I data-release/alex-mp/reference_MP2020correction.gz --exclude=""
 
 # (2) Run Evaluation

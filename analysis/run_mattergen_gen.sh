@@ -74,16 +74,3 @@ else
     # Incorrect value passed for mode of generation.
     echo ERROR: Invalid generation mode specified. See SBATCH script for info.
 fi
-
-
-# Run MatterGen Evaluation
-
-# (1) Load Reference Dataset
-git lfs pull -I data-release/alex-mp/reference_MP2020correction.gz --exclude=""
-
-# (2) Run Evaluation
-mattergen-evaluate \
-    --structures_path=$RESULTS_PATH \
-    --relax=True \
-    --structure_matcher='disordered' \
-    --save_as="$RESULTS_PATH/metrics.json"
